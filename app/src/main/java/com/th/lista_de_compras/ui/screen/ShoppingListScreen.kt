@@ -1,9 +1,7 @@
 package com.th.lista_de_compras.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,14 +13,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -43,19 +37,27 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.th.lista_de_compras.data.model.ShoppingList
 import com.th.lista_de_compras.ui.component.IconButtonWithText
+import com.th.lista_de_compras.ui.component.ShoppingListCard
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
+fun ShoppingListScreen(
+    navController: NavController,
+    viewModel: ShoppingListViewModel
+) {
     val shoppingLists = viewModel.findShoppingLists()
     val scope = rememberCoroutineScope()
-    val addShoppingListSheetState = rememberModalBottomSheetState()
-    val manageShoppingListSheetState = rememberModalBottomSheetState()
+
+    val addShoppingListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isAddShoppingListBottomSheetOpen by remember { mutableStateOf(false) }
+
+    val manageShoppingListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isManageShoppingListBottomSheetOpen by remember { mutableStateOf(false) }
     var newShoppingListName by remember { mutableStateOf("") }
 
@@ -110,6 +112,9 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
                 items(shoppingLists) { shoppingList ->
                     ShoppingListCard(
                         shoppingList = shoppingList,
+                        onCardClick = {
+                            navController.navigate("shopping-list-details/${shoppingList.id}")
+                        },
                         onManageListClick = { isManageShoppingListBottomSheetOpen = true },
                     )
                 }
@@ -135,7 +140,7 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
 
                         Button(
                             onClick = {
-                                viewModel.addShoppingList(ShoppingList(newShoppingListName))
+                                viewModel.addShoppingList(ShoppingList(UUID.randomUUID().toString(), newShoppingListName))
                                 newShoppingListName = ""
                                 scope.launch {
                                     addShoppingListSheetState.hide()
@@ -176,38 +181,6 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun ShoppingListCard(shoppingList: ShoppingList, onManageListClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = shoppingList.name,
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            IconButton(
-                onClick = onManageListClick
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Manage list",
-                )
             }
         }
     }

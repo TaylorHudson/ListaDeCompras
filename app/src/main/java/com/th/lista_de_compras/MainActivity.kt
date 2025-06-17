@@ -22,8 +22,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Lista_de_comprasTheme {
-                val viewModel = remember { ShoppingListViewModel() }
-                ShoppingListScreen(viewModel)
+                AppNavHost()
             }
         }
     }
