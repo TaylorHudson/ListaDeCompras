@@ -1,20 +1,23 @@
-package com.th.lista_de_compras.ui.component
-
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import java.math.BigDecimal
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale
 
 @Composable
-fun CurrencyInputField(
-    valueInCents: String,
-    onValueChange: (String) -> Unit,
+fun MoneyInputField(
+    amount: String,
+    onAmountChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier
 ) {
@@ -22,8 +25,8 @@ fun CurrencyInputField(
         NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     }
 
-    var textFieldValue by remember(valueInCents) {
-        val clean = valueInCents.filter { it.isDigit() }
+    var textFieldValue by remember(amount) {
+        val clean = amount.filter { it.isDigit() }
         val parsed = if (clean.isBlank()) BigDecimal.ZERO else BigDecimal(clean).divide(BigDecimal(100))
         val formatted = currencyFormatter.format(parsed)
         mutableStateOf(
@@ -36,23 +39,23 @@ fun CurrencyInputField(
 
     TextField(
         value = textFieldValue,
-        onValueChange = { it ->
-            val lastDigit = it.text.lastOrNull()?.takeIf { it.isDigit() }?.toString()
-            val newDigits = valueInCents.filter { it.isDigit() } + (lastDigit ?: "")
-
-            onValueChange(newDigits)
-
-            val parsed = newDigits.toBigDecimalOrNull()?.divide(BigDecimal(100)) ?: BigDecimal.ZERO
+        onValueChange = { newValue ->
+            val digits = newValue.text.filter { it.isDigit() }
+            // Atualiza valor externo em centavos
+            onAmountChange(digits)
+            // Formata com moeda
+            val parsed = digits.toBigDecimalOrNull()?.divide(BigDecimal(100)) ?: BigDecimal.ZERO
             val formatted = currencyFormatter.format(parsed)
-
+            // Atualiza valor interno com cursor no final
             textFieldValue = TextFieldValue(
                 text = formatted,
                 selection = TextRange(formatted.length)
             )
         },
         label = { Text(label) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
         modifier = modifier,
         singleLine = true,
+        readOnly = false
     )
 }

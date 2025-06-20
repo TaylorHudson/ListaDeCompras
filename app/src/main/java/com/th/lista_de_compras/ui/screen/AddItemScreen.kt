@@ -1,5 +1,6 @@
 package com.th.lista_de_compras.ui.screen
 
+import MoneyInputField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.th.lista_de_compras.R
 import com.th.lista_de_compras.data.model.ShoppingItem
+import com.th.lista_de_compras.utils.toBigDecimalFromCents
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
 import java.math.BigDecimal
 
@@ -47,12 +49,25 @@ fun AddItemScreen(
 ) {
     var name by remember { mutableStateOf("") }
     var quantity by remember { mutableIntStateOf(1) }
-    var amount by remember { mutableStateOf("") }
+    var priceCents by remember { mutableStateOf("") }
 
     fun resetStates() {
         name = ""
         quantity = 1
-        amount = ""
+        priceCents = ""
+    }
+
+    fun onAddItemClick() {
+        val item = ShoppingItem(
+            name = name,
+            price = priceCents.toBigDecimalFromCents(),
+            quantity = quantity
+        )
+        viewModel.addShoppingItem(
+            shoppingListId = shoppingListId,
+            item = item
+        )
+        navController.navigate("shopping-list/$shoppingListId/details")
     }
 
     Scaffold(
@@ -66,10 +81,7 @@ fun AddItemScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                            resetStates()
-                        }
+                        onClick = { navController.popBackStack() }
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -133,29 +145,16 @@ fun AddItemScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text("Preço") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                leadingIcon = {
-                    Text("R$")
-                },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            MoneyInputField(
+                amount = priceCents,
+                onAmountChange = { priceCents = it },
+                label = "Preço"
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {
-                    viewModel.addShoppingItem(
-                        shoppingListId = shoppingListId,
-                        item = ShoppingItem(name = name, price = BigDecimal(amount), quantity = quantity)
-                    )
-                    resetStates()
-                    navController.navigate("shopping-list/$shoppingListId/details")
-                },
+                onClick = { onAddItemClick() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Salvar")

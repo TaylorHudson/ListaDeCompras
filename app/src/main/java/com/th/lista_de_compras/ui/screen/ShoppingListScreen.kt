@@ -110,6 +110,33 @@ fun ShoppingListScreen(
                     .padding(16.dp)
             ) {
                 items(shoppingLists) { shoppingList ->
+                    if (isManageShoppingListBottomSheetOpen) {
+                        ModalBottomSheet(
+                            onDismissRequest = {
+                                isManageShoppingListBottomSheetOpen = false
+                            },
+                            sheetState = manageShoppingListSheetState
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                IconButtonWithText(
+                                    text = "Renomear",
+                                    icon = Icons.Default.Edit,
+                                    onClick = { /* ... */ }
+                                )
+
+                                IconButtonWithText(
+                                    text = "Excluir",
+                                    textStyle = TextStyle(
+                                        color = Color.Red
+                                    ),
+                                    isDeleteButton = true,
+                                    icon = Icons.Default.Delete,
+                                    onClick = { viewModel.deleteShoppingList(shoppingList.id) }
+                                )
+                            }
+                        }
+                    }
+
                     ShoppingListCard(
                         shoppingList = shoppingList,
                         onCardClick = {
@@ -152,33 +179,6 @@ fun ShoppingListScreen(
                             Text("Adicionar")
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                    }
-                }
-            }
-
-            if (isManageShoppingListBottomSheetOpen) {
-                ModalBottomSheet(
-                    onDismissRequest = {
-                        isManageShoppingListBottomSheetOpen = false
-                    },
-                    sheetState = manageShoppingListSheetState
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        IconButtonWithText(
-                            text = "Renomear",
-                            icon = Icons.Default.Edit,
-                            onClick = { /* ... */ }
-                        )
-
-                        IconButtonWithText(
-                            text = "Excluir",
-                            textStyle = TextStyle(
-                                color = Color.Red
-                            ),
-                            isDeleteButton = true,
-                            icon = Icons.Default.Delete,
-                            onClick = { /* ... */ }
-                        )
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package com.th.lista_de_compras.ui.component
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.th.lista_de_compras.data.model.ShoppingItem
 import com.th.lista_de_compras.utils.formatAsCurrency
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ShoppingItemCard(
     item: ShoppingItem,
@@ -32,7 +34,9 @@ fun ShoppingItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp, horizontal = 4.dp)
-            .clickable(onClick = onCardClick),
+            .combinedClickable(
+                onClick = onCardClick,
+            ),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(

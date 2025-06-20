@@ -36,6 +36,10 @@ class ShoppingListViewModel: ViewModel() {
         }
     }
 
+    fun deleteShoppingList(shoppingListId: String) {
+        shoppingLists.removeAt(shoppingLists.indexOfFirst { it.id == shoppingListId })
+    }
+
     fun toggleItemChecked(shoppingListId: String, itemId: String, isChecked: Boolean) {
         val listIndex = shoppingLists.indexOfFirst { it.id == shoppingListId }
         val list = shoppingLists[listIndex]
@@ -53,16 +57,27 @@ class ShoppingListViewModel: ViewModel() {
         shoppingLists[listIndex] = list
     }
 
-    fun updateShoppingItem(shoppingListId: String, updatedItem: ShoppingItem) {
+    fun updateShoppingItem(shoppingListId: String, item: ShoppingItem) {
         val listIndex = shoppingLists.indexOfFirst { it.id == shoppingListId }
         val list = shoppingLists[listIndex]
 
-        val itemIndex = list.items.indexOfFirst { it.id == updatedItem.id }
+        val itemIndex = list.items.indexOfFirst { it.id == item.id }
         val oldItem = list.items[itemIndex]
 
-        list.updateItem(itemIndex, oldItem.copy(name = updatedItem.name, price = updatedItem.price, quantity = updatedItem.quantity))
-        shoppingLists[listIndex] = list
+        val updatedItem = item.copy(id = oldItem.id, purchased = oldItem.purchased)
+        list.updateItem(itemIndex, updatedItem)
+        val updatedList = list.copy(items = list.items.toMutableList().apply { set(itemIndex, updatedItem) })
+        shoppingLists[listIndex] = updatedList
+
     }
 
+    fun deleteShoppingItem(shoppingListId: String, itemId: String) {
+        val listIndex = shoppingLists.indexOfFirst { it.id == shoppingListId }
+        val list = shoppingLists[listIndex]
+
+        val itemIndex = list.items.indexOfFirst { it.id == itemId }
+        list.deleteItem(itemIndex)
+        shoppingLists[listIndex] = list
+    }
 
 }

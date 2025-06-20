@@ -1,5 +1,6 @@
 package com.th.lista_de_compras.ui.screen
 
+import MoneyInputField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,8 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.th.lista_de_compras.R
 import com.th.lista_de_compras.data.model.ShoppingItem
+import com.th.lista_de_compras.utils.toBigDecimalFromCents
+import com.th.lista_de_compras.utils.toCentsString
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
-import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,14 +50,23 @@ fun EditItemScreen(
     viewModel: ShoppingListViewModel,
 ) {
     val shoppingItem = viewModel.findShoppingItemById(shoppingListId, shoppingItemId)
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf(shoppingItem.name) }
     var quantity by remember { mutableIntStateOf(shoppingItem.quantity) }
-    var amount by remember { mutableStateOf(shoppingItem.price.toString()) }
+    var priceCents by remember { mutableStateOf(shoppingItem.price.toCentsString()) }
 
-    fun resetStates() {
-        name = ""
-        quantity = 1
-        amount = ""
+    fun saveItem() {
+        val updatedItem = ShoppingItem(
+            id = shoppingItem.id,
+            name = name,
+            quantity = quantity,
+            price = priceCents.toBigDecimalFromCents()
+        )
+        viewModel.updateShoppingItem(
+            shoppingListId = shoppingListId,
+            item = updatedItem
+        )
+        navController.navigate("shopping-list/$shoppingListId/details")
     }
 
     Scaffold(
@@ -70,7 +82,7 @@ fun EditItemScreen(
                     IconButton(
                         onClick = {
                             navController.popBackStack()
-                            resetStates()
+                            saveItem()
                         }
                     ) {
                         Icon(
@@ -82,6 +94,29 @@ fun EditItemScreen(
             )
         }
     ) { padding ->
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    title = { Text("Atenção") },
+                    text = { Text("Você deseja excluir este item?") },
+                    confirmButton = {
+                        Button(onClick = {
+                            viewModel.deleteShoppingItem(shoppingListId, shoppingItem.id)
+                            showDeleteDialog = false
+                            navController.popBackStack()
+                        }) {
+                            Text("Sim")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDeleteDialog = false }) {
+                            Text("Não")
+                        }
+                    }
+                )
+        }
+
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -135,32 +170,19 @@ fun EditItemScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text("Preço") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                leadingIcon = {
-                    Text("R$")
-                },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            MoneyInputField(
+                amount = priceCents,
+                onAmountChange = { priceCents = it },
+                label = "Preço"
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {
-                    viewModel.updateShoppingItem(
-                        shoppingListId = shoppingListId,
-                        updatedItem = ShoppingItem(name = name, price = BigDecimal(amount.replace("R$", "")), quantity = quantity)
-                    )
-                    resetStates()
-                    navController.navigate("shopping-list/$shoppingListId/details")
-                },
+                onClick = { showDeleteDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Salvar")
+                Text("Deletar")
             }
         }
     }

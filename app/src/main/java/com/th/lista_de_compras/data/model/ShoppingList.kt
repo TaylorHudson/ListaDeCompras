@@ -32,4 +32,10 @@ data class ShoppingList(
             items[itemIndex] = item
         }
     }
+
+    fun deleteItem(itemIndex: Int) {
+        if (itemIndex in items.indices) {
+            items.removeAt(itemIndex)
+        }
+    }
 }

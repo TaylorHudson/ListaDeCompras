@@ -9,3 +9,14 @@ fun BigDecimal.formatAsCurrency(): String {
     val numberFormat = NumberFormat.getCurrencyInstance(Locale("pt", "BR")) as DecimalFormat
     return numberFormat.format(this)
 }
+
+fun BigDecimal.toCentsString(): String {
+    return this
+        .multiply(BigDecimal(100))
+        .toBigInteger()
+        .toString()
+}
+
+fun String.toBigDecimalFromCents(): BigDecimal {
+    return this.toBigDecimalOrNull()?.divide(BigDecimal(100)) ?: BigDecimal.ZERO
+}
