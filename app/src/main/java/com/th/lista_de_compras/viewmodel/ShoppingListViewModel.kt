@@ -17,8 +17,13 @@ class ShoppingListViewModel: ViewModel() {
         shoppingList.addItem(ShoppingItem(name = "Sal", price = BigDecimal.valueOf(2.00)))
     }
 
-    fun findShoppingListById(id: String): ShoppingList? {
-        return shoppingLists.find { it.id == id }
+    fun findShoppingListById(id: String): ShoppingList {
+        return shoppingLists[shoppingLists.indexOfFirst { it.id == id }]
+    }
+
+    fun findShoppingItemById(listId: String, itemId: String): ShoppingItem {
+        val list = shoppingLists[shoppingLists.indexOfFirst { it.id == listId }]
+        return list.items.first { it.id == itemId }
     }
 
     fun findShoppingLists(): List<ShoppingList> {
@@ -40,5 +45,24 @@ class ShoppingListViewModel: ViewModel() {
         val updatedList = list.copy(items = updatedItems.toMutableList())
         shoppingLists[listIndex] = updatedList
     }
+
+    fun addShoppingItem(shoppingListId: String, item: ShoppingItem) {
+        val listIndex = shoppingLists.indexOfFirst { it.id == shoppingListId }
+        val list = shoppingLists[listIndex]
+        list.addItem(item)
+        shoppingLists[listIndex] = list
+    }
+
+    fun updateShoppingItem(shoppingListId: String, updatedItem: ShoppingItem) {
+        val listIndex = shoppingLists.indexOfFirst { it.id == shoppingListId }
+        val list = shoppingLists[listIndex]
+
+        val itemIndex = list.items.indexOfFirst { it.id == updatedItem.id }
+        val oldItem = list.items[itemIndex]
+
+        list.updateItem(itemIndex, oldItem.copy(name = updatedItem.name, price = updatedItem.price, quantity = updatedItem.quantity))
+        shoppingLists[listIndex] = list
+    }
+
 
 }

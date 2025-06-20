@@ -9,9 +9,7 @@ data class ShoppingItem(
     val quantity: Int = 1,
     val price: BigDecimal,
     val purchased: Boolean = false
-) {
-    fun togglePurchased() = copy(purchased = !purchased)
-}
+)
 
 data class ShoppingList(
     val id: String = UUID.randomUUID().toString(),
@@ -19,13 +17,19 @@ data class ShoppingList(
     val items: MutableList<ShoppingItem> = mutableListOf()
 ) {
 
-    fun totalPrice(): BigDecimal {
-        return items.fold(BigDecimal.ZERO) { accumulator, item -> accumulator + (item.price * BigDecimal(item.quantity)) }
+    fun totalPurchasedPrice(): BigDecimal {
+        return items.fold(BigDecimal.ZERO) { accumulator, item -> accumulator + (if (item.purchased) item.price * BigDecimal(item.quantity) else BigDecimal.ZERO) }
     }
 
     fun addItem(item: ShoppingItem) {
         if (item.name.isNotBlank() && items.none { it.name == item.name }) {
             items.add(item)
+        }
+    }
+
+    fun updateItem(itemIndex: Int, item: ShoppingItem) {
+        if (item.name.isNotBlank() && items.none { it.name == item.name }) {
+            items[itemIndex] = item
         }
     }
 }

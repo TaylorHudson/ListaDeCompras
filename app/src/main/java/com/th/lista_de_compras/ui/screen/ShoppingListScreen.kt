@@ -97,7 +97,7 @@ fun ShoppingListScreen(
                     Spacer(modifier = Modifier.height(15.dp))
 
                     Text(
-                        text = "Toque no botão \"+\" para criar uma lista de compra",
+                        text = "Toque no botão + para criar uma lista de compra",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -113,7 +113,7 @@ fun ShoppingListScreen(
                     ShoppingListCard(
                         shoppingList = shoppingList,
                         onCardClick = {
-                            navController.navigate("shopping-list-details/${shoppingList.id}")
+                            navController.navigate("shopping-list/${shoppingList.id}/details")
                         },
                         onManageListClick = { isManageShoppingListBottomSheetOpen = true },
                     )
