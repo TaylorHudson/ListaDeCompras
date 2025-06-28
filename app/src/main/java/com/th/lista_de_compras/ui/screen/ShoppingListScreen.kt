@@ -1,5 +1,6 @@
 package com.th.lista_de_compras.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,19 +11,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +37,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.th.lista_de_compras.data.model.ShoppingList
 import com.th.lista_de_compras.ui.component.IconButtonWithText
@@ -63,44 +64,73 @@ fun ShoppingListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(
-                    text = "Minhas listas",
-                    fontWeight = FontWeight.Bold
-                )
-            })
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { isAddShoppingListBottomSheetOpen = true },
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add new shopping list")
-            }
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier.padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-
-            if (shoppingLists.isEmpty()) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+            TopAppBar(
+                title = {
                     Text(
-                        text = "Nenhuma lista de compra cadastrada",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge,
+                        text = "Minhas listas",
                         fontWeight = FontWeight.Bold
                     )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black
+                )
+            )
+        },
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(Color.White)
+        ) {
 
-                    Spacer(modifier = Modifier.height(15.dp))
+            Button(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                onClick = {
+                    isAddShoppingListBottomSheetOpen = true
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Criar nova lista",
+                    modifier = Modifier.padding(1.dp),
+                    style = TextStyle(
+                        fontSize = 12.sp
+                    ),
+                )
+            }
 
-                    Text(
-                        text = "Toque no botão + para criar uma lista de compra",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+            if (shoppingLists.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Nenhuma lista de compra cadastrada",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                        )
+
+                        Spacer(modifier = Modifier.height(15.dp))
+
+                        Text(
+                            text = "Toque no botão para criar uma lista de compra",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black,
+                        )
+                    }
                 }
             }
 
