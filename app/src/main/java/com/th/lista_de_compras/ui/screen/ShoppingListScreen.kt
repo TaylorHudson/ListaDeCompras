@@ -21,6 +21,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -58,8 +59,6 @@ fun ShoppingListScreen(
     val addShoppingListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isAddShoppingListBottomSheetOpen by remember { mutableStateOf(false) }
 
-    val manageShoppingListSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var isManageShoppingListBottomSheetOpen by remember { mutableStateOf(false) }
     var newShoppingListName by remember { mutableStateOf("") }
 
     Scaffold(
@@ -140,39 +139,12 @@ fun ShoppingListScreen(
                     .padding(16.dp)
             ) {
                 items(shoppingLists) { shoppingList ->
-                    if (isManageShoppingListBottomSheetOpen) {
-                        ModalBottomSheet(
-                            onDismissRequest = {
-                                isManageShoppingListBottomSheetOpen = false
-                            },
-                            sheetState = manageShoppingListSheetState
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                IconButtonWithText(
-                                    text = "Renomear",
-                                    icon = Icons.Default.Edit,
-                                    onClick = { /* ... */ }
-                                )
-
-                                IconButtonWithText(
-                                    text = "Excluir",
-                                    textStyle = TextStyle(
-                                        color = Color.Red
-                                    ),
-                                    isDeleteButton = true,
-                                    icon = Icons.Default.Delete,
-                                    onClick = { viewModel.deleteShoppingList(shoppingList.id) }
-                                )
-                            }
-                        }
-                    }
-
                     ShoppingListCard(
                         shoppingList = shoppingList,
                         onCardClick = {
                             navController.navigate("shopping-list/${shoppingList.id}/details")
                         },
-                        onManageListClick = { isManageShoppingListBottomSheetOpen = true },
+                        onManageListClick = { navController.navigate("shopping-list/${shoppingList.id}/manage") },
                     )
                 }
             }
@@ -183,14 +155,32 @@ fun ShoppingListScreen(
                         isAddShoppingListBottomSheetOpen = false
                         newShoppingListName = ""
                     },
-                    sheetState = addShoppingListSheetState
+                    sheetState = addShoppingListSheetState,
+                    containerColor = Color.White
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .background(Color.White),
+                    ) {
                         TextField(
                             value = newShoppingListName,
                             onValueChange = { newShoppingListName = it },
                             label = { Text("Nome da lista") },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black,
+                                disabledTextColor = Color.Black,
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedLabelColor = Color.Black,
+                                unfocusedLabelColor = Color.Black,
+                                focusedIndicatorColor = Color.Black,
+                                unfocusedIndicatorColor = Color.Gray,
+                                cursorColor = Color.Black
+                            )
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -204,9 +194,15 @@ fun ShoppingListScreen(
                                     isAddShoppingListBottomSheetOpen = false
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Black,
+                                contentColor = Color.White
+                            )
                         ) {
-                            Text("Adicionar")
+                            Text("Salvar")
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                     }

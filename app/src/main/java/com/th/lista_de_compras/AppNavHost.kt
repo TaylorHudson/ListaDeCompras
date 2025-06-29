@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.th.lista_de_compras.ui.screen.AddItemScreen
 import com.th.lista_de_compras.ui.screen.EditItemScreen
+import com.th.lista_de_compras.ui.screen.EditListScreen
 import com.th.lista_de_compras.ui.screen.ShoppingListDetailsScreen
 import com.th.lista_de_compras.ui.screen.ShoppingListScreen
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
@@ -40,6 +41,22 @@ fun AppNavHost(
             val listId = backStackEntry.arguments?.getString("id")
             listId?.let {
                 ShoppingListDetailsScreen(
+                    navController = navController,
+                    viewModel = viewModel,
+                    shoppingListId = listId
+                )
+            }
+        }
+
+        composable(
+            route = "shopping-list/{id}/manage",
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val listId = backStackEntry.arguments?.getString("id")
+            listId?.let {
+                EditListScreen(
                     navController = navController,
                     viewModel = viewModel,
                     shoppingListId = listId

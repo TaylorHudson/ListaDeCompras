@@ -1,6 +1,9 @@
 package com.th.lista_de_compras.viewmodel
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.th.lista_de_compras.data.model.ShoppingItem
 import com.th.lista_de_compras.data.model.ShoppingList
@@ -9,6 +12,7 @@ import java.util.UUID
 
 class ShoppingListViewModel: ViewModel() {
     private val shoppingLists = mutableStateListOf<ShoppingList>()
+    var wasListDeleted by mutableStateOf(false)
 
     init {
         val shoppingList = ShoppingList(id = UUID.randomUUID().toString(), name = "Feira do Mês")
@@ -36,8 +40,14 @@ class ShoppingListViewModel: ViewModel() {
         }
     }
 
+    fun updateShoppingList(shoppingList: ShoppingList) {
+        val index = shoppingLists.indexOfFirst { it.id == shoppingList.id }
+        shoppingLists[index] = shoppingList
+    }
+
     fun deleteShoppingList(shoppingListId: String) {
-        shoppingLists.removeAt(shoppingLists.indexOfFirst { it.id == shoppingListId })
+        val index = shoppingLists.indexOfFirst { it.id == shoppingListId }
+        shoppingLists.removeAt(index)
     }
 
     fun toggleItemChecked(shoppingListId: String, itemId: String, isChecked: Boolean) {
