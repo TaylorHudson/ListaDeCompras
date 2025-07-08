@@ -53,7 +53,7 @@ fun EditListScreen(
             items = shoppingList.items,
         )
         viewModel.updateShoppingList(updatedList)
-        navController.popBackStack()
+        navController.navigate("shopping-list/$shoppingListId/details")
     }
 
     Scaffold(
@@ -99,7 +99,7 @@ fun EditListScreen(
                             onClick = {
                                 viewModel.deleteShoppingList(shoppingList.id)
                                 showDeleteDialog = false
-                                navController.popBackStack()
+                                navController.navigate("shopping-list/$shoppingListId/details")
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White,

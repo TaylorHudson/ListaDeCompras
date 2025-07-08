@@ -2,10 +2,13 @@ package com.th.lista_de_compras.ui.screen
 
 import android.app.AlertDialog
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.th.lista_de_compras.ui.component.ShoppingItemCard
 import com.th.lista_de_compras.utils.formatAsCurrency
+import com.th.lista_de_compras.viewmodel.FilterType
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -154,23 +158,99 @@ fun ShoppingListDetailsScreen(
                     }
                 }
             } else {
-                LazyColumn(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
-                    items(shoppingList.items) { shoppingItem ->
-                        ShoppingItemCard(
-                            item = shoppingItem,
-                            onCheckedChange = { isChecked ->
-                                viewModel.toggleItemChecked(shoppingListId, shoppingItem.id, isChecked)
-                            },
-                            onCardClick = {
-                                navController.navigate("shopping-list/${shoppingList.id}/edit-item/${shoppingItem.id}")
-                            }
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        val buttonModifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 2.dp)
+
+                        Button(
+                            onClick = { viewModel.setFilter(FilterType.ALL) },
+                            modifier = buttonModifier,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
+                        ) {
+                            Text("Todos")
+                        }
+
+                        Button(
+                            onClick = { viewModel.setFilter(FilterType.PURCHASED) },
+                            modifier = buttonModifier,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
+                        ) {
+                            Text("Comprados")
+                        }
+
+                        Button(
+                            onClick = { viewModel.setFilter(FilterType.PENDING) },
+                            modifier = buttonModifier,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
+                        ) {
+                            Text("Pendentes")
+                        }
                     }
+
+                    if(viewModel.findFilteredItems(shoppingList.id).isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Nenhum item encontrado com esse filtro",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                )
+
+                                Spacer(modifier = Modifier.height(15.dp))
+
+                                Text(
+                                    text = "Toque no botão para criar um item de compra",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Black,
+                                )
+                            }
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
+                            items(viewModel.findFilteredItems(shoppingList.id)) { shoppingItem ->
+                                ShoppingItemCard(
+                                    item = shoppingItem,
+                                    onCheckedChange = { isChecked ->
+                                        viewModel.toggleItemChecked(
+                                            shoppingListId,
+                                            shoppingItem.id,
+                                            isChecked
+                                        )
+                                    },
+                                    onCardClick = {
+                                        navController.navigate("shopping-list/${shoppingList.id}/edit-item/${shoppingItem.id}")
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                 }
+
             }
         }
     }

@@ -1,24 +1,43 @@
 package com.th.lista_de_compras.viewmodel
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.th.lista_de_compras.data.model.ShoppingItem
 import com.th.lista_de_compras.data.model.ShoppingList
-import java.math.BigDecimal
-import java.util.UUID
+
+enum class FilterType {
+    ALL, PURCHASED, PENDING
+}
 
 class ShoppingListViewModel: ViewModel() {
     private val shoppingLists = mutableStateListOf<ShoppingList>()
-    var wasListDeleted by mutableStateOf(false)
+    private val filter = mutableStateOf(FilterType.ALL)
 
-    init {
-        val shoppingList = ShoppingList(id = UUID.randomUUID().toString(), name = "Feira do Mês")
-        addShoppingList(shoppingList)
-        shoppingList.addItem(ShoppingItem(name = "Arroz", price = BigDecimal.valueOf(8.50)))
-        shoppingList.addItem(ShoppingItem(name = "Sal", price = BigDecimal.valueOf(2.00)))
+    fun setFilter(type: FilterType) {
+        filter.value = type
+    }
+
+    fun findFilteredItems(listId: String): List<ShoppingItem> {
+        val shoppingList = findShoppingListById(listId)
+        return when (filter.value) {
+            FilterType.ALL -> shoppingList.items
+            FilterType.PURCHASED -> shoppingList.items.filter { it.purchased }
+            FilterType.PENDING -> shoppingList.items.filter { !it.purchased }
+        }
+    }
+
+    fun addShoppingList(shoppingList: ShoppingList) {
+        shoppingLists.add(shoppingList)
+    }
+
+    fun deleteShoppingList(shoppingListId: String) {
+        shoppingLists.removeAll { it.id == shoppingListId }
+    }
+
+    fun updateShoppingList(shoppingList: ShoppingList) {
+        val index = shoppingLists.indexOfFirst { it.id == shoppingList.id }
+        shoppingLists[index] = shoppingList
     }
 
     fun findShoppingListById(id: String): ShoppingList {
@@ -34,30 +53,13 @@ class ShoppingListViewModel: ViewModel() {
         return shoppingLists
     }
 
-    fun addShoppingList(shoppingList: ShoppingList) {
-        if (shoppingList.name.isNotBlank() && shoppingLists.none { it.name == shoppingList.name }) {
-            shoppingLists.add(shoppingList)
-        }
-    }
-
-    fun updateShoppingList(shoppingList: ShoppingList) {
-        val index = shoppingLists.indexOfFirst { it.id == shoppingList.id }
-        shoppingLists[index] = shoppingList
-    }
-
-    fun deleteShoppingList(shoppingListId: String) {
-        val index = shoppingLists.indexOfFirst { it.id == shoppingListId }
-        shoppingLists.removeAt(index)
-    }
-
     fun toggleItemChecked(shoppingListId: String, itemId: String, isChecked: Boolean) {
         val listIndex = shoppingLists.indexOfFirst { it.id == shoppingListId }
         val list = shoppingLists[listIndex]
-        val updatedItems = list.items.map { item ->
-            if (item.id == itemId) item.copy(purchased = isChecked) else item
-        }
-        val updatedList = list.copy(items = updatedItems.toMutableList())
-        shoppingLists[listIndex] = updatedList
+        val updatedItems = list.items.map {
+            if (it.id == itemId) it.copy(purchased = isChecked) else it
+        }.toMutableList()
+        shoppingLists[listIndex] = list.copy(items = updatedItems)
     }
 
     fun addShoppingItem(shoppingListId: String, item: ShoppingItem) {
@@ -78,7 +80,6 @@ class ShoppingListViewModel: ViewModel() {
         list.updateItem(itemIndex, updatedItem)
         val updatedList = list.copy(items = list.items.toMutableList().apply { set(itemIndex, updatedItem) })
         shoppingLists[listIndex] = updatedList
-
     }
 
     fun deleteShoppingItem(shoppingListId: String, itemId: String) {
