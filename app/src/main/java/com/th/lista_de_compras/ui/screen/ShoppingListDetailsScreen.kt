@@ -176,9 +176,11 @@ fun ShoppingListDetailsScreen(
                         Button(
                             onClick = { viewModel.setFilter(FilterType.ALL) },
                             modifier = buttonModifier,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
                         ) {
-                            Text("Todos")
+                            Text(text = "Todos", style = TextStyle(
+                                fontSize = 10.sp
+                            ))
                         }
 
                         Button(
@@ -186,7 +188,9 @@ fun ShoppingListDetailsScreen(
                             modifier = buttonModifier,
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
                         ) {
-                            Text("Comprados")
+                            Text(text = "Comprados", style = TextStyle(
+                            fontSize = 10.sp
+                            ))
                         }
 
                         Button(
@@ -194,7 +198,9 @@ fun ShoppingListDetailsScreen(
                             modifier = buttonModifier,
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
                         ) {
-                            Text("Pendentes")
+                            Text(text = "Pendentes", style = TextStyle(
+                                fontSize = 10.sp
+                            ))
                         }
                     }
 
