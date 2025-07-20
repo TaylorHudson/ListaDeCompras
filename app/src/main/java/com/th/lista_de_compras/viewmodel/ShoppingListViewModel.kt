@@ -1,47 +1,96 @@
 package com.th.lista_de_compras.viewmodel
 
+import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.th.lista_de_compras.data.model.ShoppingItem
 import com.th.lista_de_compras.data.model.ShoppingList
+import com.th.lista_de_compras.data.model.loadShoppingLists
+import com.th.lista_de_compras.data.model.saveShoppingLists
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_data")
+val SHOPPING_LISTS_KEY = stringPreferencesKey("shopping_lists")
 
 enum class FilterType {
     ALL, PURCHASED, PENDING
 }
 
-class ShoppingListViewModel: ViewModel() {
+class ShoppingListViewModel(application: Application) : AndroidViewModel(application) {
+    @SuppressLint("StaticFieldLeak")
+    private val context = application.applicationContext
     private val shoppingLists = mutableStateListOf<ShoppingList>()
-    private val filter = mutableStateOf(FilterType.ALL)
+    private val _filter = mutableStateOf(FilterType.ALL)
+    val filter: State<FilterType> = _filter
 
-    fun setFilter(type: FilterType) {
-        filter.value = type
+    init {
+        viewModelScope.launch {
+            loadShoppingLists(context).collect { loadedLists ->
+                shoppingLists.clear()
+                shoppingLists.addAll(loadedLists)
+            }
+        }
     }
 
-    fun findFilteredItems(listId: String): List<ShoppingItem> {
-        val shoppingList = findShoppingListById(listId)
-        return when (filter.value) {
-            FilterType.ALL -> shoppingList.items
-            FilterType.PURCHASED -> shoppingList.items.filter { it.purchased }
-            FilterType.PENDING -> shoppingList.items.filter { !it.purchased }
+    private fun persist() {
+        viewModelScope.launch {
+            saveShoppingLists(context, shoppingLists)
         }
+    }
+
+    fun setFilter(type: FilterType) {
+        _filter.value = type
+    }
+
+    fun findFilteredItems(listId: String, query: String): List<ShoppingItem> {
+        val shoppingList = findShoppingListById(listId) ?: return emptyList()
+
+        val filteredItems = if (query.isNotBlank()) {
+            shoppingList.items.filter { it.name.contains(query, ignoreCase = true) }
+        } else {
+            shoppingList.items
+        }
+
+        return when (filter.value) {
+            FilterType.ALL -> filteredItems
+            FilterType.PURCHASED -> filteredItems.filter { it.purchased }
+            FilterType.PENDING -> filteredItems.filter { !it.purchased }
+        }
+
     }
 
     fun addShoppingList(shoppingList: ShoppingList) {
         shoppingLists.add(shoppingList)
+        persist()
     }
 
     fun deleteShoppingList(shoppingListId: String) {
         shoppingLists.removeAll { it.id == shoppingListId }
+        persist()
     }
 
     fun updateShoppingList(shoppingList: ShoppingList) {
         val index = shoppingLists.indexOfFirst { it.id == shoppingList.id }
         shoppingLists[index] = shoppingList
+        persist()
     }
 
-    fun findShoppingListById(id: String): ShoppingList {
-        return shoppingLists[shoppingLists.indexOfFirst { it.id == id }]
+    fun findShoppingListById(id: String): ShoppingList? {
+        return shoppingLists.find { it.id == id }
     }
 
     fun findShoppingItemById(listId: String, itemId: String): ShoppingItem {
@@ -60,6 +109,7 @@ class ShoppingListViewModel: ViewModel() {
             if (it.id == itemId) it.copy(purchased = isChecked) else it
         }.toMutableList()
         shoppingLists[listIndex] = list.copy(items = updatedItems)
+        persist()
     }
 
     fun addShoppingItem(shoppingListId: String, item: ShoppingItem) {
@@ -67,6 +117,7 @@ class ShoppingListViewModel: ViewModel() {
         val list = shoppingLists[listIndex]
         list.addItem(item)
         shoppingLists[listIndex] = list
+        persist()
     }
 
     fun updateShoppingItem(shoppingListId: String, item: ShoppingItem) {
@@ -80,6 +131,7 @@ class ShoppingListViewModel: ViewModel() {
         list.updateItem(itemIndex, updatedItem)
         val updatedList = list.copy(items = list.items.toMutableList().apply { set(itemIndex, updatedItem) })
         shoppingLists[listIndex] = updatedList
+        persist()
     }
 
     fun deleteShoppingItem(shoppingListId: String, itemId: String) {
@@ -89,6 +141,7 @@ class ShoppingListViewModel: ViewModel() {
         val itemIndex = list.items.indexOfFirst { it.id == itemId }
         list.deleteItem(itemIndex)
         shoppingLists[listIndex] = list
+        persist()
     }
 
 }

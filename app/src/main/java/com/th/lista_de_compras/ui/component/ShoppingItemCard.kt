@@ -38,7 +38,7 @@ fun ShoppingItemCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 4.dp)
+            .padding(vertical = 2.dp, horizontal = 0.dp)
             .border(
                 width = 1.dp,
                 color = Color.Black.copy(alpha = 0.1f),
@@ -53,7 +53,7 @@ fun ShoppingItemCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
@@ -65,8 +65,6 @@ fun ShoppingItemCard(
                     uncheckedColor = Color.Black
                 )
             )
-
-            Spacer(modifier = Modifier.width(8.dp))
 
             Text(
                 text = "${item.quantity}x ${item.name}",

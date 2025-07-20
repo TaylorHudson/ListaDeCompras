@@ -23,6 +23,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,14 @@ fun EditListScreen(
     viewModel: ShoppingListViewModel,
 ) {
     val shoppingList = viewModel.findShoppingListById(shoppingListId)
+
+    if (shoppingList == null) {
+        LaunchedEffect(Unit) {
+            navController.popBackStack()
+        }
+        return
+    }
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf(shoppingList.name) }
 
@@ -99,7 +108,6 @@ fun EditListScreen(
                             onClick = {
                                 viewModel.deleteShoppingList(shoppingList.id)
                                 showDeleteDialog = false
-                                navController.navigate("shopping-list/$shoppingListId/details")
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White,

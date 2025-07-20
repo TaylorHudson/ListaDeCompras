@@ -1,5 +1,6 @@
 package com.th.lista_de_compras
 
+import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -20,7 +21,8 @@ import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
 fun AppNavHost(
     navController: NavHostController = rememberNavController()
 ) {
-    val viewModel = remember { ShoppingListViewModel() }
+    var application = LocalContext.current.applicationContext as Application
+    val viewModel = remember { ShoppingListViewModel(application) }
 
     NavHost(navController = navController, startDestination = "shopping-lists") {
 

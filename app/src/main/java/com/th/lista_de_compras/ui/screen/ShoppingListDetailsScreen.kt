@@ -1,6 +1,5 @@
 package com.th.lista_de_compras.ui.screen
 
-import android.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,11 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,16 +25,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.th.lista_de_compras.ui.component.FilterButton
+import com.th.lista_de_compras.ui.component.SearchBar
 import com.th.lista_de_compras.ui.component.ShoppingItemCard
 import com.th.lista_de_compras.utils.formatAsCurrency
 import com.th.lista_de_compras.viewmodel.FilterType
@@ -50,7 +53,16 @@ fun ShoppingListDetailsScreen(
     viewModel: ShoppingListViewModel,
     shoppingListId: String,
 ) {
+    var searchQuery by remember { mutableStateOf("") }
     val shoppingList = viewModel.findShoppingListById(shoppingListId)
+    val currentFilter = viewModel.filter
+
+    if (shoppingList == null) {
+        LaunchedEffect(Unit) {
+            navController.popBackStack()
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -80,7 +92,7 @@ fun ShoppingListDetailsScreen(
                 )
             )
         }
-    )  { paddingValues ->
+    ) { paddingValues ->
 
         Column(
             modifier = Modifier
@@ -125,7 +137,7 @@ fun ShoppingListDetailsScreen(
                     text = "Criar novo item",
                     modifier = Modifier.padding(1.dp),
                     style = TextStyle(
-                        fontSize = 12.sp
+                        fontSize = 10.sp
                     ),
                 )
             }
@@ -161,8 +173,13 @@ fun ShoppingListDetailsScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
+                        .padding(12.dp)
                 ) {
+                    SearchBar(
+                        query = searchQuery,
+                        onQueryChange = { searchQuery = it }
+                    )
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -172,39 +189,24 @@ fun ShoppingListDetailsScreen(
                         val buttonModifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 2.dp)
-
-                        Button(
-                            onClick = { viewModel.setFilter(FilterType.ALL) },
-                            modifier = buttonModifier,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
-                        ) {
-                            Text(text = "Todos", style = TextStyle(
-                                fontSize = 10.sp
-                            ))
-                        }
-
-                        Button(
-                            onClick = { viewModel.setFilter(FilterType.PURCHASED) },
-                            modifier = buttonModifier,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
-                        ) {
-                            Text(text = "Comprados", style = TextStyle(
-                            fontSize = 10.sp
-                            ))
-                        }
-
-                        Button(
-                            onClick = { viewModel.setFilter(FilterType.PENDING) },
-                            modifier = buttonModifier,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
-                        ) {
-                            Text(text = "Pendentes", style = TextStyle(
-                                fontSize = 10.sp
-                            ))
+                        val filters = listOf(
+                            FilterType.ALL to "Todos",
+                            FilterType.PURCHASED to "Comprados",
+                            FilterType.PENDING to "Pendentes"
+                        )
+                        Row {
+                            filters.forEach { (type, label) ->
+                                FilterButton(
+                                    modifier = buttonModifier,
+                                    onClick = { viewModel.setFilter(type) },
+                                    text = label,
+                                    selected = currentFilter.value == type
+                                )
+                            }
                         }
                     }
 
-                    if(viewModel.findFilteredItems(shoppingList.id).isEmpty()) {
+                    if (viewModel.findFilteredItems(shoppingList.id, searchQuery).isEmpty()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize(),
@@ -214,7 +216,7 @@ fun ShoppingListDetailsScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Nenhum item encontrado com esse filtro",
+                                    text = "Nenhum item encontrado",
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Bold,
@@ -234,10 +236,10 @@ fun ShoppingListDetailsScreen(
                     } else {
                         LazyColumn(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
+                                .weight(1f)
                         ) {
-                            items(viewModel.findFilteredItems(shoppingList.id)) { shoppingItem ->
+
+                            items(viewModel.findFilteredItems(shoppingList.id, searchQuery)) { shoppingItem ->
                                 ShoppingItemCard(
                                     item = shoppingItem,
                                     onCheckedChange = { isChecked ->
@@ -252,11 +254,10 @@ fun ShoppingListDetailsScreen(
                                     }
                                 )
                             }
+
                         }
                     }
-
                 }
-
             }
         }
     }
