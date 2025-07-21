@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.th.lista_de_compras.R
 import com.th.lista_de_compras.data.model.ShoppingItem
+import com.th.lista_de_compras.ui.component.ValidatedTextField
 import com.th.lista_de_compras.utils.toBigDecimalFromCents
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
 
@@ -102,26 +103,13 @@ fun AddItemScreen(
                 .fillMaxSize()
                 .background(Color.White),
         ) {
-            TextField(
+            ValidatedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nome") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    disabledTextColor = Color.Black,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Gray,
-                    cursorColor = Color.Black
-                )
+                label = "Nome",
+                validator = {
+                    if (name.isBlank()) "Digite o nome do item" else null
+                },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -131,6 +119,7 @@ fun AddItemScreen(
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 TextField(
                     value = quantity.toString(),
                     onValueChange = {

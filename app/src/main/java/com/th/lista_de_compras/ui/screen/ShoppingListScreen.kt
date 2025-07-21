@@ -43,6 +43,7 @@ import androidx.navigation.NavController
 import com.th.lista_de_compras.data.model.ShoppingList
 import com.th.lista_de_compras.ui.component.IconButtonWithText
 import com.th.lista_de_compras.ui.component.ShoppingListCard
+import com.th.lista_de_compras.ui.component.ValidatedTextField
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -162,25 +163,14 @@ fun ShoppingListScreen(
                         modifier = Modifier
                             .background(Color.White),
                     ) {
-                        TextField(
+
+                        ValidatedTextField(
                             value = newShoppingListName,
                             onValueChange = { newShoppingListName = it },
-                            label = { Text("Nome da lista") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedTextColor = Color.Black,
-                                unfocusedTextColor = Color.Black,
-                                disabledTextColor = Color.Black,
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedLabelColor = Color.Black,
-                                unfocusedLabelColor = Color.Black,
-                                focusedIndicatorColor = Color.Black,
-                                unfocusedIndicatorColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
+                            label = "Nome",
+                            validator = {
+                                if (newShoppingListName.isBlank()) "Digite o nome da lista" else null
+                            },
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))

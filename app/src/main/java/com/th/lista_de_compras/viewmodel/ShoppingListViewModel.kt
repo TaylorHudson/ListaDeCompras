@@ -22,6 +22,7 @@ import com.th.lista_de_compras.data.model.saveShoppingLists
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.text.Normalizer
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_data")
 val SHOPPING_LISTS_KEY = stringPreferencesKey("shopping_lists")
@@ -56,11 +57,20 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
         _filter.value = type
     }
 
+    private fun removeAccents(input: String): String {
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+            .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
+    }
+
     fun findFilteredItems(listId: String, query: String): List<ShoppingItem> {
         val shoppingList = findShoppingListById(listId) ?: return emptyList()
 
+        val normalizedQuery = removeAccents(query.lowercase())
         val filteredItems = if (query.isNotBlank()) {
-            shoppingList.items.filter { it.name.contains(query, ignoreCase = true) }
+            shoppingList.items.filter {
+                val itemNameNormalized = removeAccents(it.name.lowercase())
+                itemNameNormalized.contains(normalizedQuery)
+            }
         } else {
             shoppingList.items
         }
@@ -93,9 +103,9 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
         return shoppingLists.find { it.id == id }
     }
 
-    fun findShoppingItemById(listId: String, itemId: String): ShoppingItem {
+    fun findShoppingItemById(listId: String, itemId: String): ShoppingItem? {
         val list = shoppingLists[shoppingLists.indexOfFirst { it.id == listId }]
-        return list.items.first { it.id == itemId }
+        return list.items.find { it.id == itemId }
     }
 
     fun findShoppingLists(): List<ShoppingList> {

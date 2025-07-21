@@ -28,6 +28,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.th.lista_de_compras.R
 import com.th.lista_de_compras.data.model.ShoppingItem
+import com.th.lista_de_compras.ui.component.ValidatedTextField
 import com.th.lista_de_compras.utils.toBigDecimalFromCents
 import com.th.lista_de_compras.utils.toCentsString
 import com.th.lista_de_compras.viewmodel.ShoppingListViewModel
@@ -56,6 +58,14 @@ fun EditItemScreen(
     viewModel: ShoppingListViewModel,
 ) {
     val shoppingItem = viewModel.findShoppingItemById(shoppingListId, shoppingItemId)
+
+    if (shoppingItem == null) {
+        LaunchedEffect(Unit) {
+            navController.navigate("shopping-list/$shoppingListId/details")
+        }
+        return
+    }
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf(shoppingItem.name) }
     var quantity by remember { mutableIntStateOf(shoppingItem.quantity) }
@@ -75,6 +85,11 @@ fun EditItemScreen(
         navController.navigate("shopping-list/$shoppingListId/details")
     }
 
+    fun deleteItem() {
+        viewModel.deleteShoppingItem(shoppingListId, shoppingItem.id)
+        navController.navigate("shopping-list/${shoppingListId}/details")
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,7 +102,6 @@ fun EditItemScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navController.popBackStack()
                             saveItem()
                         }
                     ) {
@@ -117,9 +131,7 @@ fun EditItemScreen(
                     confirmButton = {
                         Button(
                             onClick = {
-                                viewModel.deleteShoppingItem(shoppingListId, shoppingItem.id)
-                                showDeleteDialog = false
-                                navController.popBackStack()
+                                deleteItem()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White,
@@ -150,26 +162,13 @@ fun EditItemScreen(
                 .background(Color.White),
             verticalArrangement = Arrangement.Top
         ) {
-            TextField(
+            ValidatedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nome") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    disabledTextColor = Color.Black,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black,
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Gray,
-                    cursorColor = Color.Black
-                )
+                label = "Nome",
+                validator = {
+                    if (name.isBlank()) "Digite o nome do item" else null
+                },
             )
 
             Spacer(modifier = Modifier.height(16.dp))

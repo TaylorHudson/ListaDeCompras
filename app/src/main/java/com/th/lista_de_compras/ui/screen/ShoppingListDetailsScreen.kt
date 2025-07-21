@@ -59,7 +59,7 @@ fun ShoppingListDetailsScreen(
 
     if (shoppingList == null) {
         LaunchedEffect(Unit) {
-            navController.popBackStack()
+            navController.navigate("shopping-lists")
         }
         return
     }
@@ -76,7 +76,7 @@ fun ShoppingListDetailsScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navController.popBackStack()
+                            navController.navigate("shopping-lists")
                         }
                     ) {
                         Icon(
@@ -239,7 +239,7 @@ fun ShoppingListDetailsScreen(
                                 .weight(1f)
                         ) {
 
-                            items(viewModel.findFilteredItems(shoppingList.id, searchQuery)) { shoppingItem ->
+                            items(viewModel.findFilteredItems(shoppingList.id, searchQuery), key = { it.id }) { shoppingItem ->
                                 ShoppingItemCard(
                                     item = shoppingItem,
                                     onCheckedChange = { isChecked ->
