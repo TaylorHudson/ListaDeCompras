@@ -47,6 +47,11 @@ fun ValidatedTextField(
             unfocusedIndicatorColor = Color.Gray,
             cursorColor = Color.Black,
             errorContainerColor = Color.White,
+            errorTextColor = Color.Red,
+            errorLabelColor = Color.Red,
+            errorCursorColor = Color.Red,
+            errorIndicatorColor = Color.Red,
+            errorSupportingTextColor = Color.Red,
         ),
         isError = errorMessage != null,
         supportingText = {
