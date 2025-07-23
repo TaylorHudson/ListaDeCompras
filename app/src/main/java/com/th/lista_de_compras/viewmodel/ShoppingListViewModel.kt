@@ -24,9 +24,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.text.Normalizer
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_data")
-val SHOPPING_LISTS_KEY = stringPreferencesKey("shopping_lists")
-
 enum class FilterType {
     ALL, PURCHASED, PENDING
 }
