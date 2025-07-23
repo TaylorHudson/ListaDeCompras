@@ -2,25 +2,15 @@ package com.th.lista_de_compras.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.th.lista_de_compras.data.model.ShoppingItem
 import com.th.lista_de_compras.data.model.ShoppingList
 import com.th.lista_de_compras.data.model.loadShoppingLists
 import com.th.lista_de_compras.data.model.saveShoppingLists
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.text.Normalizer
 
